@@ -1,18 +1,19 @@
 # Fill out your Project Information
 
-Student1: \<name-1>
+Student1: Kritika Manna
 
-Student2: \<name-2>
+Student2: Wanchen Zheng
 
-Project Github url: \<github-url> 
+Project Github url: https://github.com/wanchenzhang/rnaseq/tree/master
 
+As discussed - commits were made using 1 system only to avoid conflicts.
 
 # Next steps
 
-1. Add us to the Project Github
-2. Work together on the pipeline
-3. Commit+push your work frequently
-4. Write your report and also upload your paper **in PDF format**
+1. Add us to the Project Github - collaborators added
+2. Work together on the pipeline - wanchen and I worked together but commits were only made using her computer to avoid conflicts
+3. Commit+push your work frequently - done
+4. Write your report and also upload your paper **in PDF format** - done 
 
 
 
