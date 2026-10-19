@@ -6,6 +6,128 @@ params {
 
 process SAYHELLO {
     debug true
+    script:
+    """
+    echo 'Hello World!'
+    """
+}
+
+// Task 2
+process SAYHELLO_PYTHON {
+    debug true
+
+    script:
+    """
+    #!/usr/bin/env python3
+    print("Hello World!")
+    """
+}
+
+// Task 3
+process SAYHELLO_PARAM {
+    debug true
+
+    input:
+    val greeting
+
+    script:
+    """
+    echo '${greeting}'
+    """
+}
+
+// Task 4
+process SAYHELLO_FILE {
+    input:
+    val greeting
+
+    output:
+    path 'hello.txt'
+
+    script:
+    """
+    echo '${greeting}' > hello.txt
+    """
+}
+// Task 5
+process UPPERCASE {
+    input:
+    val text
+
+    output:
+    path 'upper.txt'
+
+    script:
+    """
+    echo '${text}' | tr '[:lower:]' '[:upper:]' > upper.txt
+    """
+}
+
+// Task 6
+process PRINTUPPER {
+    debug true
+
+    input:
+    path upper_file
+
+    script:
+    """
+    cat ${upper_file}
+    """
+}
+// Task 7
+process ZIPFILE {
+    input:
+    path upper_file
+    val format
+
+    output:
+    path "${upper_file}.*"
+
+    script:
+    if (format == 'zip')
+        """
+        zip ${upper_file}.zip ${upper_file}
+        """
+    else if (format == 'gzip')
+        """
+        gzip -c ${upper_file} > ${upper_file}.gz
+        """
+    else if (format == 'bzip2')
+        """
+        bzip2 -c ${upper_file} > ${upper_file}.bz2
+        """
+    else
+        error "Unknown zip format: ${format}. Use zip, gzip or bzip2."
+}
+// Task 8
+process ZIPALL {
+    input:
+    path upper_file
+
+    output:
+    path "${upper_file}.*"
+
+    script:
+    """
+    zip ${upper_file}.zip ${upper_file}
+    gzip -c ${upper_file} > ${upper_file}.gz
+    bzip2 -c ${upper_file} > ${upper_file}.bz2
+    """
+}
+
+// Task 9
+process WRITETOFILE {
+    input:
+    val person
+
+    output:
+    path 'line.tsv'
+
+    script:
+    """
+    printf '%s\\t%s\\n' '${person.name}' '${person.title}' > line.tsv
+    """
 }
 
 
@@ -53,12 +175,16 @@ workflow {
     //          Print out the path to the zipped file in the console
     if (params.step == 7) {
         greeting_ch = Channel.of("Hello world!")
+        out_ch = UPPERCASE(greeting_ch)
+        ZIPFILE(out_ch, params.zip).view()
     }
 
     // Task 8 - Create a process that zips the file created in the UPPERCASE process in "zip", "gzip" AND "bzip2" format. Print out the paths to the zipped files in the console
 
     if (params.step == 8) {
         greeting_ch = Channel.of("Hello world!")
+        out_ch = UPPERCASE(greeting_ch)
+        ZIPALL(out_ch).flatten().view()
     }
 
     // Task 9 - Create a process that reads in a list of names and titles from a channel and writes them to a file.
@@ -75,8 +201,9 @@ workflow {
             ['name': 'Dobby', 'title': 'hero'],
         )
 
-        in_ch
-            | WRITETOFILE
+    
+        out_ch = in_ch | WRITETOFILE
+        out_ch.collectFile(name: 'names.tsv', seed: "name\ttitle\n", storeDir: 'results')
             // continue here
     }
 
